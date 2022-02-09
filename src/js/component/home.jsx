@@ -5,70 +5,52 @@ const Home = () => {
 	const [lista, setLista] = useState([]);
 
 	const guardarDatos = (e) => {
+		/*esta es la funcion agregar*/
 		e.preventDefault();
-		setLista([...lista, { id: lista.length, nombre: tarea }]);
+		// console.log(lista);
+		setLista([...lista, { label: tarea, done: false }]);
+		actualizarLista([...lista, { label: tarea, done: false }]);
 		setTarea("");
 	};
 
-	const borrarDatos = (id) => {
-		const listaActualizada = lista.filter((item) => item.id !== id);
-		setLista(listaActualizada);
+	const borrarDatos = (label) => {
+		/*esta es la funcion eliminar*/
+		const listaAct = lista.filter((item) => item.label !== label);
+		actualizarLista(listaAct);
+		setLista(listaAct);
+		console.log(listaAct);
 	};
-	useEffect(() => {
-		const getTodos = () => {
-			fetch(
-				"https://assets.breatheco.de/apis/fake/todos/user/nicolasgarces",
-				{
-					method: "GET",
-					body: JSON.stringify(getTodos),
-					headers: {
-						"Content-Type": "application/json",
-					},
-				}
-			)
-				.then((resp) => {
-					console.log(resp.ok); // Será true (verdad) si la respuesta es exitosa.
-					console.log(resp.status); // el código de estado = 200 o código = 400 etc.
-					console.log(resp.text()); // Intentará devolver el resultado exacto como cadena (string)
-					return resp.json(); // (regresa una promesa) will try to parse the result as json as return a promise that you can .then for results
-				})
-				.then((data) => {
-					//Aquí es donde debe comenzar tu código después de que finalice la búsqueda
-					console.log(data); //esto imprimirá en la consola el objeto exacto recibido del servidor
-				})
-				.catch((error) => {
-					//manejo de errores
-					console.log(error);
-				});
-		};
-		getTodos();
 
-		/*put*/
-
+	function actualizarLista(listaAct) {
 		fetch(
 			"https://assets.breatheco.de/apis/fake/todos/user/nicolasgarces",
 			{
 				method: "PUT",
-				body: JSON.stringify(setLista),
+				body: JSON.stringify(listaAct),
 				headers: {
 					"Content-Type": "application/json",
 				},
 			}
 		)
 			.then((resp) => {
-				console.log(resp.ok); // will be true if the response is successfull
-				console.log(resp.status); // the status code = 200 or code = 400 etc.
-				console.log(resp.text()); // will try return the exact result as string
-				return resp.json(); // (returns promise) will try to parse the result as json as return a promise that you can .then for results
-			})
-			.then((data) => {
-				//here is were your code should start after the fetch finishes
-				console.log(data); //this will print on the console the exact object received from the server
+				return resp.json(); // (regresa una promesa) will try to parse the result as json as return a promise that you can .then for results
 			})
 			.catch((error) => {
-				//error handling
+				//manejo de errores
 				console.log(error);
 			});
+	}
+
+	function obtenerLista() {
+		/* funcion para obtener los datos del get */
+		fetch("https://assets.breatheco.de/apis/fake/todos/user/nicolasgarces")
+			.then((response) => response.json())
+			.then((data) => setLista(data));
+	}
+
+	useEffect(() => {
+		//codigo que quiero que se ejecute
+		obtenerLista();
 	}, []);
 
 	return (
@@ -87,20 +69,21 @@ const Home = () => {
 						value={tarea}
 					/>
 					<ul className="list-group list-group-flush">
-						{lista.map((item) => (
+						{lista.map((item, index) => (
 							<li
 								className=" lista list-group-item mt-1 mb-1 "
-								key={item.id}>
+								key={index}>
 								{" "}
-								{item.nombre}{" "}
+								{item.label}{" "}
 								<i
 									className="bi bi-x-lg position-absolute top-40 end-0"
-									onClick={() => borrarDatos(item.id)}></i>
+									onClick={() => borrarDatos(item.label)}></i>
 							</li>
 						))}
 					</ul>
 				</div>
 			</form>
+			<p>{lista.length} Items Left</p>
 		</div>
 	);
 };
